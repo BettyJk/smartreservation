@@ -1,0 +1,129 @@
+<!-- frontend/templates/dashboards/admin.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-lg">
+    <div class="card-header bg-danger text-white">
+        <h3>Admin Dashboard</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- System Overview (Left Column) -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>System Overview</h5>
+                        <div class="row">
+                            <div class="col-6 col-md-12 col-xl-6 mb-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h6>Total Seats</h6>
+                                        <h2>{{ total_seats }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-12 col-xl-6 mb-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <h6>Available</h6>
+                                        <h2>{{ available }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-12 col-xl-6 mb-3">
+                                <div class="card bg-warning text-dark">
+                                    <div class="card-body">
+                                        <h6>Reserved</h6>
+                                        <h2>{{ reserved }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-12 col-xl-6 mb-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body">
+                                        <h6>Occupied</h6>
+                                        <h2>{{ occupied }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Management Tools (Right Column) -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-4">Quick Actions</h5>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'export_reservations_csv' %}" class="btn btn-dark">
+                                <i class="bi bi-download"></i> Export Reservations CSV
+                            </a>
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-lock"></i> Block Seats
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-calendar-event"></i> Schedule Maintenance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Recent Reservations</h5>
+                        <div class="list-group">
+                            {% for reservation in recent_reservations %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ reservation.user }}</strong>
+                                        <span class="text-muted">in {{ reservation.seat.number }}</span>
+                                    </div>
+                                    <div>
+                                        <small>{{ reservation.start_time|date:"H:i" }} - {{ reservation.end_time|date:"H:i" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="list-group-item text-muted">
+                                No recent reservations
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- dashboards/admin.html -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6>Total Seats</h6>
+                <h2>{{ seats.total }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6>Available Now</h6>
+                <h2>{{ seats.available }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6>Currently Occupied</h6>
+                <h2>{{ seats.occupied }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

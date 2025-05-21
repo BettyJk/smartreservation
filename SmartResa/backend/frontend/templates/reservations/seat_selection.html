@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Available Seats</h2>
+    <div class="row g-4" id="seat-container">
+        {% for seat in seats %}
+        <div class="col-md-3" data-seat-number="{{ seat.number }}">
+            <div class="card h-100 {% if seat.is_reserved %}bg-warning{% else %}bg-success{% endif %}">
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        {{ seat.number }}
+                        <span class="badge bg-dark">
+                            {{ seat.get_seat_type_display }}
+                        </span>
+                    </h5>
+                    <p class="card-text mb-2 seat-status">
+                        <i class="bi bi-circle-fill"></i>
+                        {% if seat.is_reserved %}RESERVED{% else %}AVAILABLE{% endif %}
+                    </p>
+                    
+                    {% if not seat.is_reserved %}
+                    <a href="{% url 'create_reservation' seat.id %}" 
+                       class="btn btn-primary btn-sm reserve-btn 
+                       {% if seat.seat_type == 'teacher' and user.role != 'teacher' %}disabled{% endif %}"
+                       {% if seat.seat_type == 'teacher' and user.role != 'teacher' %}
+                       title="Only teachers can reserve this seat"{% endif %}>
+                        <i class="bi bi-clock"></i> Reserve Now
+                    </a>
+                    {% else %}
+                    <small class="text-muted d-block mt-2 reservation-time">
+                        {% with seat.reservation_set.first as res %}
+                        Reserved until {{ res.end_time|time:"H:i" }}
+                        {% endwith %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const socket = new WebSocket(`ws://${window.location.host}/ws/seats/`);
+    
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const seatCards = document.querySelectorAll(`[data-seat-number="${data.number}"]`);
+        
+        seatCards.forEach(seatCard => {
+            const cardBody = seatCard.querySelector('.card');
+            const statusElement = seatCard.querySelector('.seat-status');
+            const btn = seatCard.querySelector('.reserve-btn');
+            const timeElement = seatCard.querySelector('.reservation-time');
+
+            // Update card styling
+            cardBody.className = `card h-100 ${getStatusClass(data.status)}`;
+            
+            // Update status text
+            if(statusElement) {
+                statusElement.innerHTML = `
+                    <i class="bi bi-circle-fill"></i>
+                    ${data.status.toUpperCase()}
+                `;
+            }
+            
+            // Update button visibility
+            if(btn) {
+                btn.style.display = data.status === 'available' ? 'inline-block' : 'none';
+            }
+            
+            // Update reservation time
+            if(timeElement) {
+                timeElement.textContent = data.end_time ? 
+                    `Reserved until ${new Date(data.end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` : 
+                    '';
+            }
+        });
+    };
+
+    function getStatusClass(status) {
+        return {
+            'available': 'bg-success',
+            'reserved': 'bg-warning',
+            'occupied': 'bg-danger',
+            'blocked': 'bg-secondary'
+        }[status] || 'bg-secondary';
+    }
+})();
+</script>
+{% endblock %}

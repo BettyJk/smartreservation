@@ -1,0 +1,28 @@
+<!-- frontend/templates/dashboards/student.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-lg">
+    <div class="card-header bg-primary text-white">
+        <h3>Student Dashboard - {{ user.get_full_name }}</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Your Reservations</h5>
+                        <!-- Reservation list -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <h4>Available Seats</h4>
+                <div class="seat-map row g-3">
+                    <!-- Seat cards -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
